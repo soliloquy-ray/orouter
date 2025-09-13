@@ -1,0 +1,57 @@
+@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  .prose {
+    @apply text-gray-300 max-w-none;
+  }
+  .prose p {
+    @apply my-4 leading-relaxed px-1 text-lg;
+  }
+  .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+    @apply text-white font-semibold;
+  }
+  .prose a {
+    @apply text-blue-400 hover:text-blue-300;
+  }
+  .prose strong {
+    @apply text-white font-semibold;
+  }
+  .prose blockquote {
+    /* @apply border-l-4 border-gray-600 pl-4 text-gray-400 italic; */
+    @apply hidden;
+  }
+  .prose code {
+    @apply bg-gray-900/80 text-red-400 rounded-md px-1.5 py-1 text-sm font-mono;
+  }
+  .prose pre {
+    @apply bg-gray-900/80 text-gray-300 rounded-lg p-4 text-sm overflow-x-auto;
+  }
+  .prose pre code {
+    @apply bg-transparent p-0 text-inherit;
+  }
+  .prose ul, .prose ol {
+      @apply pl-6;
+  }
+  .prose ul > li::marker {
+      @apply text-gray-500;
+  }
+  .prose ol > li::marker {
+      @apply text-gray-500 font-medium;
+  }
+}
+/* 
+.mains blockquote {
+  font-size: 0.7rem;
+  display: none;
+}
+
+.mains h3 {
+  font-size :1.8rem;
+}
+
+.mains p {
+  margin-top: 1rem;
+} */
