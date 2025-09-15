@@ -1,14 +1,24 @@
 "use client";
 import { Save } from 'lucide-react';
+import React, { useEffect } from 'react';
 
 interface SystemPromptProps {
-  systemPrompt: string;
-  setSystemPrompt: (value: string) => void;
-  handleSaveSystemPrompt: () => void;
+  handleSaveSystemPrompt: (systemPrompt: string) => void;
   isSavingPrompt: boolean;
 }
 
-export default function SystemPrompt({ systemPrompt, setSystemPrompt, handleSaveSystemPrompt, isSavingPrompt }: SystemPromptProps) {
+export default function SystemPrompt({ handleSaveSystemPrompt, isSavingPrompt }: SystemPromptProps) {
+  const [systemPrompt, setSystemPrompt] = React.useState("You are a helpful assistant.");
+  useEffect(() => {
+    const loadSystemPrompt = async () => {
+      const response = await fetch("/api/settings");
+      if (response.ok) {
+        const data = await response.json();
+        setSystemPrompt(data.prompt || "You are a helpful assistant.");
+      }
+    };
+    loadSystemPrompt();
+  }, []);
   return (
     <div className="border-t border-gray-700 pt-4">
       <label
@@ -26,7 +36,7 @@ export default function SystemPrompt({ systemPrompt, setSystemPrompt, handleSave
         placeholder="e.g., You are a helpful assistant."
       />
       <button
-        onClick={handleSaveSystemPrompt}
+        onClick={() => handleSaveSystemPrompt(systemPrompt)}
         disabled={isSavingPrompt}
         className="flex items-center justify-center w-full p-2 mt-2 rounded-md bg-green-600 hover:bg-green-700 disabled:bg-gray-600"
       >

@@ -18,9 +18,7 @@ interface SidebarProps {
   handleNewConversation: () => void;
   handleDeleteConversation: (e: React.MouseEvent, id: string) => void;
   
-  systemPrompt: string;
-  setSystemPrompt: (value: string) => void;
-  handleSaveSystemPrompt: () => void;
+  handleSaveSystemPrompt: (prompt: string) => void;
   isSavingPrompt: boolean;
 
   apiKeys: ApiKey[];
@@ -31,8 +29,7 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ 
-  conversations, currentConversationId, setCurrentConversationId, handleNewConversation, handleDeleteConversation,
-  systemPrompt, setSystemPrompt, handleSaveSystemPrompt, isSavingPrompt,
+  conversations, currentConversationId, setCurrentConversationId, handleNewConversation, handleDeleteConversation, handleSaveSystemPrompt, isSavingPrompt,
   apiKeys, newApiKey, setNewApiKey, handleAddApiKey, handleDeleteApiKey
  }: SidebarProps) {
   
@@ -72,8 +69,6 @@ export default function Sidebar({
 
       <div className="flex-shrink-0 space-y-4">
         <SystemPrompt 
-            systemPrompt={systemPrompt}
-            setSystemPrompt={setSystemPrompt}
             handleSaveSystemPrompt={handleSaveSystemPrompt}
             isSavingPrompt={isSavingPrompt}
         />

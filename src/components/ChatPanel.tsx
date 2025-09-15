@@ -8,6 +8,7 @@ interface ChatPanelProps {
   isLoading: boolean;
   handleSend: (message: string) => void;
   handleEditAndBranch: (index: number, newContent: string) => void;
+  onRegenerate: (index: number) => void; // New prop for regenerating
   currentConversationId: string | null;
   activeBranch: number;
   totalBranches: number;
@@ -24,7 +25,8 @@ const ChatPanel = ({
   activeBranch,
   totalBranches,
   handleSwitchBranch,
-  onMobileInputClick
+  onMobileInputClick,
+  onRegenerate
 }: ChatPanelProps) => {
   return (
     <div id="chatPanel" className="flex flex-col h-full bg-gray-800">
@@ -58,6 +60,8 @@ const ChatPanel = ({
             key={index}
             message={msg}
             onEdit={(newContent) => handleEditAndBranch(index, newContent)}
+            onRegenerate={() => onRegenerate(index)} // Pass the regenerate handler
+            isLoading={isLoading}
           />
         ))}
         {isLoading && messages.length > 0 && messages[messages.length - 1].role === 'user' && (

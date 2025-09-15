@@ -18,6 +18,7 @@ const chatRequestSchema = z.object({
   branchFromIndex: z.number().optional(), // If present, a new branch is created
 });
 
+const MAX_MESSAGES_TO_SEND = 60; // Adjust this number as needed
 export async function POST(req: NextRequest) {
   /* const ip = req.ip ?? "127.0.0.1";
   const { success: rateLimitSuccess } = await ratelimit.limit(ip);
@@ -58,7 +59,7 @@ export async function POST(req: NextRequest) {
     let successfulKey;
 
     const userMessage = messages[messages.length - 1];
-    const messagesForApi = [{ role: "system", content: systemPrompt }, ...messages];
+    const messagesForApi = [{ role: "system", content: systemPrompt }, ...messages.slice(-MAX_MESSAGES_TO_SEND)];
 
     for (const key of availableKeys) {
         const openRouterPayload = {

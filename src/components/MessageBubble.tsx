@@ -1,20 +1,24 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Message } from '@/types';
 import { useMediaQuery } from '@/hooks/';
-import { Bot, User, ChevronDown, ChevronUp, Pencil, Check, X } from 'lucide-react';
+import { Bot, User, ChevronDown, ChevronUp, Pencil, Check, X, RefreshCw, ClipboardCopy } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
 interface MessageBubbleProps {
   message: Message;
   onEdit: (newContent: string) => void;
+  onRegenerate: () => void;
+  isLoading: boolean;
+  isHidden?: boolean;
 }
 
-const MessageBubble: React.FC<MessageBubbleProps> = ({ message, onEdit }) => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+const MessageBubble: React.FC<MessageBubbleProps> = ({ message, onEdit, onRegenerate, isLoading, isHidden = false }) => {
+  const [isCollapsed, setIsCollapsed] = useState(isLoading);
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(message.content);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [isCopied, setIsCopied] = useState(false);
   const isMobile = useMediaQuery('(max-width: 768px)');
   
   // Refs for long press logic
@@ -72,6 +76,13 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, onEdit }) => {
     }
   };
 
+  const handleCopy = () => {
+    navigator.clipboard.writeText(message.content).then(() => {
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000); // Reset icon after 2 seconds
+    });
+  };
+
   return (
     <div className={`flex items-start gap-0 md:gap-4 group ${isBot ? '' : 'flex-row-reverse'}`}>
       <div className={`hidden md:block md:flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${isBot ? 'bg-indigo-500' : 'bg-blue-500'}`}>
@@ -119,6 +130,17 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, onEdit }) => {
             )}
           </>
         )}
+        <div className="absolute bottom-2 right-2 flex items-end">
+          <button onClick={handleCopy} className="bg-gray-600 p-1.5 rounded-full text-white hover:bg-gray-500 transition-all">
+                  {isCopied ? <Check size={14} className="text-green-400" /> : <ClipboardCopy size={14} />}
+                </button>
+                
+                {isBot && (
+                  <button onClick={onRegenerate} className="bg-gray-600 p-1.5 rounded-full text-white hover:bg-gray-500 transition-all">
+                    <RefreshCw size={14} />
+                  </button>
+                )}
+        </div>
       </div>
     </div>
   );

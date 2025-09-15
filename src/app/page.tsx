@@ -82,16 +82,71 @@ export default function ChatPage() {
     } catch (error) { console.error(error); }
   };
 
-  const handleSaveSystemPrompt = async () => {
+  const handleSaveSystemPrompt = async (prompt: string) => {
     setIsSavingPrompt(true);
     try {
       await fetch("/api/settings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: systemPrompt }),
+        body: JSON.stringify({ prompt }),
       });
     } catch (error) { console.error("Failed to save prompt", error); } 
     finally { setIsSavingPrompt(false); }
+  };
+
+  
+
+  const handleRegenerate = async (assistantMessageIndex: number) => {
+    // We resend the history *up to the prompt* that created the assistant message.
+    const historyToResend = messages.slice(0, assistantMessageIndex);
+    
+    setMessages(historyToResend); // Optimistically update UI
+    setIsLoading(true);
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          conversationId: currentConversationId,
+          messages: historyToResend,
+          isBranching: true, // Regenerating always creates a new branch
+          systemPrompt: systemPrompt
+        }),
+      });
+
+      if (response.body) {
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let assistantResponse = '';
+        setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            const chunk = decoder.decode(value);
+            assistantResponse += chunk;
+            setMessages(prev => {
+                const updated = [...prev];
+                updated[updated.length - 1].content = assistantResponse;
+                return updated;
+            });
+        }
+      }
+    } catch (error) {
+      console.error('Failed to regenerate response:', error);
+      setMessages(messages); // Revert on error
+    } finally {
+      setIsLoading(false);
+      // Refresh to get the new branch info
+      const res = await fetch(`/api/conversations/${currentConversationId}`);
+      if(res.ok) {
+          const data = await res.json();
+          setMessages(data.messages);
+          setActiveBranch(data.activeBranch);
+          setTotalBranches(data.totalBranches);
+      }
+    }
   };
 
   const fetchConversations = async () => {
@@ -272,8 +327,6 @@ export default function ChatPage() {
             setCurrentConversationId={handleSetCurrentConversationId}
             handleNewConversation={handleNewConversation}
             handleDeleteConversation={handleDeleteConversation}
-            systemPrompt={systemPrompt}
-            setSystemPrompt={setSystemPrompt}
             handleSaveSystemPrompt={handleSaveSystemPrompt}
             isSavingPrompt={isSavingPrompt}
             apiKeys={apiKeys}
@@ -291,6 +344,7 @@ export default function ChatPage() {
           handleSend={handleSend}
           handleEditAndBranch={handleEditAndBranch}
           currentConversationId={currentConversationId}
+          onRegenerate={handleRegenerate}
           activeBranch={activeBranch}
           totalBranches={totalBranches}
           handleSwitchBranch={handleSwitchBranch}
