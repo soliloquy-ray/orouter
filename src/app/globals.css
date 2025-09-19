@@ -20,8 +20,8 @@
     @apply text-white font-semibold;
   }
   .prose blockquote {
-    /* @apply border-l-4 border-gray-600 pl-4 text-gray-400 italic; */
-    @apply hidden;
+    @apply border-l-4 border-gray-600 pl-4 text-gray-400 italic;
+    /* @apply hidden; */
   }
   .prose code {
     @apply bg-gray-900/80 text-red-400 rounded-md px-1.5 py-1 text-sm font-mono;

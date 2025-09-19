@@ -9,11 +9,13 @@ const saveRequestSchema = z.object({
     z.object({
       role: z.enum(['user', 'assistant', 'system']),
       content: z.string(),
+      reasoning: z.string().default(''),
     })
   ),
   assistantMessage: z.object({
     role: z.literal('assistant'),
     content: z.string(),
+    reasoning: z.string().default(''),
   }),
 });
 

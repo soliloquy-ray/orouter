@@ -116,6 +116,8 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, onEdit, onRegene
         ) : (
           <>
             <div className={`prose prose-invert max-w-none prose-p:my-0 prose-headings:my-2 prose-ul:my-2 prose-ol:my-2 ${isCollapsed ? 'max-h-24 overflow-hidden' : ''}`}>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.reasoning}</ReactMarkdown>
+                <hr className="my-2 border-gray-500" />
                <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
             </div>
             {!isEditing && (

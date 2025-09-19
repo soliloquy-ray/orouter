@@ -10,6 +10,7 @@ const messageSchema = new Schema<Message>(
       required: true,
     },
     content: { type: String, required: true },
+    reasoning: { type: String, default: "" },
   },
   { _id: false } // Don't create separate _id for each message in the array
 );

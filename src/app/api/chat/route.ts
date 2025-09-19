@@ -12,6 +12,7 @@ const chatRequestSchema = z.object({
     z.object({
       role: z.enum(["user", "assistant", "system"]),
       content: z.string(),
+      reasoning: z.string().default(""), // Optional reasoning field
     })
   ),
   systemPrompt: z.string(),
@@ -69,8 +70,13 @@ export async function POST(req: NextRequest) {
           reasoning: {
             enabled: true,
             effort: "high"
+          },
+          max_tokens: 0,
+          stream_options: {
+            include_usage: true
           }
         };
+        console.log({openRouterPayload});
 
         const response = await fetch(
             "https://openrouter.ai/api/v1/chat/completions",
@@ -115,6 +121,7 @@ export async function POST(req: NextRequest) {
         const reader = openRouterResponse.body.getReader();
         const decoder = new TextDecoder();
         let fullResponse = "";
+        let fullReasoning = "";
 
         while (true) {
           const { done, value } = await reader.read();
@@ -126,18 +133,23 @@ export async function POST(req: NextRequest) {
             if (jsonStr === "[DONE]") continue;
             try {
               const parsed = JSON.parse(jsonStr);
+              const reasoning = parsed.choices[0]?.delta?.reasoning;
               const content = parsed.choices[0]?.delta?.content;
               if (content) {
                 fullResponse += content;
                 controller.enqueue(content);
+              }
+              if (reasoning) {
+                fullReasoning += reasoning;
+                controller.enqueue(reasoning);
               }
             } catch (e) {
               console.error("Error parsing stream chunk:", e);
             }
           }
         }
-        
-        const finalAssistantMessage = { role: "assistant" as Role, content: fullResponse };
+
+        const finalAssistantMessage = { role: "assistant" as Role, content: fullResponse, reasoning: fullReasoning };
         
         // **FIX**: Ensure branches array exists.
         if (!conversation.branches) {
@@ -160,7 +172,6 @@ export async function POST(req: NextRequest) {
         if (conversation.branches[conversation.activeBranch] && conversation.branches[conversation.activeBranch].messages.length <= 2 && !isBranching) {
           conversation.title = messages[0].content.substring(0, 50);
         }
-        console.log({conversation});
         
         await conversation.save();
         controller.close();
